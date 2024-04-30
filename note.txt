@@ -10,7 +10,9 @@ sementara venv __pycache__ dihapus dulu, habis ini buatkan lagi
 
 pythonanywhre 
 1. buka tab web lakukan configurasi manual web
-2. mkvirtualenv myvirtualenv --python=/usr/bin/python3.9
-3. clone github
-4. pip cache purge
-5. pip install -r requirements.txt --no-cache-dir
+2. buka consoles
+3. mkvirtualenv myvirtualenv --python=/usr/bin/python3.9
+4. git clone https://github.com/anjanidwilestari/prediksisuhu.git
+5. cd prediksisuhu
+6. pip cache purge
+7. pip install -r requirements.txt --no-cache-dir
