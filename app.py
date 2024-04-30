@@ -6,7 +6,7 @@ import numpy as np
 from sklearn.preprocessing import MinMaxScaler
 from werkzeug.utils import secure_filename
 import sys
-from model import *
+from model.model import Backpropagation, NeuralNetwork, Sigmoid
 
 # Fungsi untuk mengonversi nilai Nh ke dalam label angka
 def convert_to_label(input_value):
@@ -34,12 +34,12 @@ def convert_to_label(input_value):
 app = Flask(__name__)
 
 # Memuat model dari file 'model.pkl'
-with open('model.pkl', 'rb') as f:
-    model = pickle.load(f)
+with open('model/model.pkl', 'rb') as b:
+    model = pickle.load(b)
 
 # Memuat scaler dari file 'scaler.pkl'
-with open('scaler.pkl', 'rb') as f:
-    scaler = pickle.load(f)
+with open('model/scaler.pkl', 'rb') as s:
+    scaler = pickle.load(s)
 
 @app.route("/")
 def hello():

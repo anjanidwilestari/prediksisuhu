@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Prediksi Suhu Udara</title>
+    <!-- CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous" />
+    <style>
+      /* Atur warna latar belakang */
+      body {
+        background-color: #f5f5fa; /* Warna abu-abu */
+        margin-bottom: 60px; /* Sesuaikan dengan tinggi footer */
+      }
+
+      /* Gaya footer */
+      .footer {
+        position: fixed;
+        bottom: 0;
+        width: 100%;
+        background-color: #ffffff;
+        padding: 10px 0;
+        height: 60px; /* Sesuaikan dengan tinggi footer */
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="row justify-content-center mt-5">
+        <div class="col-md-6">
+          <div class="text-center mb-5">
+            <h1>Prediksi Suhu Udara</h1>
+          </div>
+          <!-- Form untuk prediksi suhu -->
+          <form action="{{ url_for('predict') }}" method="post">
+            <div class="mb-3">
+              <input type="text" class="form-control" id="Nh" name="Nh" placeholder="Masukkan nilai Nh (Jumlah Semua Awan) [0-100]" pattern="^(100(\.0{1,2})?|[0-9]?[0-9](\.[0-9]{1,2})?)$" title="Masukkan nilai antara 0 hingga 100" required />
+            </div>
+            <div class="mb-3">
+              <input
+                type="text"
+                class="form-control"
+                id="T"
+                name="T"
+                placeholder="Masukkan nilai T (Target Suhu) [0 atau 22,6-36,8] "
+                pattern="^((0)|([2][2-9]\.[6-9]|[3][0-5]\.[0-8])|36\.[0-8])$"
+                title="Masukkan nilai antara 0 atau 22,6-36,8"
+                required />
+            </div>
+            <div class="mb-3">
+              <button type="submit" class="btn btn-warning w-100">Prediksi</button>
+            </div>
+          </form>
+        </div>
+      </div>
+      <div class="row justify-content-center mt-4">
+        <div class="col-md-6">
+          <!-- Upload file Excel -->
+          <form action="{{ url_for('predict') }}" method="post" enctype="multipart/form-data">
+            <div class="text-center mb-5">
+              <h5>Atau prediksi melalui file disini</h5>
+              <p>Pastikan file memiliki header kolom [Nh] dan [T]</p>
+            </div>
+            <div class="row mb-3">
+              <div class="col-md-8">
+                <input class="form-control" type="file" id="file" name="file" accept=".xlsx" title="Pastikan file .xlsx terdapat header kolom [Nh] dan [T]" required />
+              </div>
+              <div class="col-md-4">
+                <button type="submit" class="btn btn-warning w-100">Unggah</button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Hasil Prediksi -->
+      <hr />
+      <div class="text-center">
+        <b>{{ prediction_text }}</b>
+      </div>
+      <!-- Tampilkan tabel prediksi jika ada -->
+      {% if prediction_table %}
+      <div class="row justify-content-center mt-3">
+        <div class="col-md-8">
+          <div class="text-center">
+            <div class="mb-3">
+              <h2>Hasil Prediksi</h2>
+            </div>
+            <div class="table-responsive">{{ prediction_table | safe }}</div>
+            <!-- Tombol download -->
+            <div class="mb-3">
+              <a href="{{ download_link }}" class="btn btn-warning mt-3">Unduh Prediksi</a>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+    <!-- Footer -->
+    <div class="footer text-center" style="background-color: #ffffff; padding: 10px 0">
+      <p>&copy; 2024 Anjani Dwilestari &#174; - Skripsi</p>
+    </div>
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-+voBBN5F5BRf/x5s0j28rPdYorogHsTs+jTkVvk5UL0vEArUfweha0El+NyoXp+1" crossorigin="anonymous"></script>
+  </body>
+</html>
