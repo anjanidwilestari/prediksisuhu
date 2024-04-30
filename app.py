@@ -8,6 +8,8 @@ from werkzeug.utils import secure_filename
 import sys
 from model.model import Backpropagation, NeuralNetwork, Sigmoid
 
+app = Flask(__name__)
+
 # Fungsi untuk mengonversi nilai Nh ke dalam label angka
 def convert_to_label(input_value):
     if input_value == 0:
@@ -31,7 +33,7 @@ def convert_to_label(input_value):
     else:
         return None  # Menangani input yang tidak valid
 
-app = Flask(__name__)
+
 
 # Memuat model dari file 'model.pkl'
 with open('model/model.pkl', 'rb') as b:
@@ -117,4 +119,4 @@ def download(filename):
     return send_file(output_path, as_attachment=True)
 
 if __name__ == "__main__":
-    app.run()
+    app.run(debug=True)
