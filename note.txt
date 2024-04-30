@@ -12,4 +12,5 @@ pythonanywhre
 1. buka tab web lakukan configurasi manual web
 2. mkvirtualenv myvirtualenv --python=/usr/bin/python3.9
 3. clone github
-4. 
+4. pip cache purge
+5. pip install -r requirements.txt --no-cache-dir

@@ -118,5 +118,5 @@ def download(filename):
     # Kembalikan file Excel sebagai respons unduhan
     return send_file(output_path, as_attachment=True)
 
-if __name__ == "__main__":
-    app.run(debug=True)
+# if __name__ == "__main__":
+#     app.run(debug=True)
