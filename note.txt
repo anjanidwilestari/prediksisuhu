@@ -1,6 +1,10 @@
 1. create folder prediksisuhu C:\Users\ayian
 2. python -m venv venv
 3. source venv/Scripts/activate
+4. pip install flask
+5. pip install pandas
+6. pip install scikit-learn==1.2.2
+7. pip install openpyxl
 4. pip freeze > requirements.txt
 5. pip install -r requirements.txt
 
