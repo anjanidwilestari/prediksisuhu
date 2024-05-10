@@ -5,34 +5,59 @@ import pickle
 import numpy as np
 from sklearn.preprocessing import MinMaxScaler
 from werkzeug.utils import secure_filename
-import sys
+from sklearn.impute import KNNImputer  # Import KNNImputer
 from model.model import Backpropagation, NeuralNetwork, Sigmoid
 
 app = Flask(__name__)
 
 # Fungsi untuk mengonversi nilai Nh ke dalam label angka
 def convert_to_label(input_value):
-    if input_value == 0:
-        return 8  # 'no clouds'
-    elif input_value <= 10:
-        return 0  # '10% or less, but not 0'
-    elif input_value <= 30:
-        return 2  # '20-30%'
-    elif input_value <= 40:
-        return 3  # '40%'
-    elif input_value <= 50:
-        return 4  # '50%'
-    elif input_value <= 60:
-        return 5  # '60%'
-    elif input_value <= 80:
-        return 6  # '70 - 80%'
-    elif input_value < 100:
-        return 7  # '90 or more, but not 100%'
-    elif input_value == 100:
-        return 1  # '100%'
+    if isinstance(input_value, str):  # Periksa apakah nilai input adalah string
+        # Buat dictionary untuk memetakan kategori ke label
+        if input_value == "no clouds":
+            return 8  # 'no clouds'
+        elif input_value == "10%  or less, but not 0":
+            return 0  # '10% or less, but not 0'
+        elif input_value == "20–30%.":
+            return 2  # '20-30%'
+        elif input_value == "40%.":
+            return 3  # '40%'
+        elif input_value == "50%.":
+            return 4  # '50%'
+        elif input_value == "60%.":
+            return 5  # '60%'
+        elif input_value == "70 – 80%.":
+            return 6  # '70 - 80%'
+        elif input_value == "90  or more, but not 100%":
+            return 7  # "90  or more, but not 100%"
+        elif input_value == "100%.":
+            return 1  # '100%'
+        else:
+            return "Data masukan tidak valid"  # Menangani input yang tidak valid
+    elif isinstance(input_value, float):  # Jika nilai input adalah float
+        rounded_value = int(round(input_value))  # Bulatkan nilai input
+        if rounded_value == 0:
+            return 8  # 'no clouds'
+        elif rounded_value <= 10:
+            return 0  # '10% or less, but not 0'
+        elif rounded_value <= 30:
+            return 2  # '20-30%'
+        elif rounded_value <= 40:
+            return 3  # '40%'
+        elif rounded_value <= 50:
+            return 4  # '50%'
+        elif rounded_value <= 60:
+            return 5  # '60%'
+        elif rounded_value <= 80:
+            return 6  # '70 - 80%'
+        elif rounded_value < 100:
+            return 7  # '90 or more, but not 100%'
+        elif rounded_value == 100:
+            return 1  # '100%'
+        else:
+            return "Data masukan tidak valid"  # Menangani input yang tidak valid
     else:
-        return None  # Menangani input yang tidak valid
-
+        return "Data masukan tidak valid"  # Menangani input yang tidak valid
 
 # Memuat model dari file 'model.pkl'
 with open('model/model.pkl', 'rb') as b:
@@ -62,45 +87,43 @@ def predict():
         if file.filename == '':
             return render_template('index.html', prediction_text="Mohon pilih file terlebih dahulu.")
         if file:
-            filename = secure_filename(file.filename)  # Perbaiki nama file
+            filename = secure_filename(file.filename)
             if filename.endswith('.xlsx'):
-                # Pastikan direktori 'uploads' ada
                 if not os.path.exists('uploads'):
                     os.makedirs('uploads')
                 file_path = os.path.join('uploads', filename)
                 file.save(file_path)
                 df = pd.read_excel(file_path)
-                
+
                 try:
-                    df = pd.read_excel(file_path)
-                    # Periksa apakah header sesuai dengan yang diharapkan
                     if 'Nh' not in df.columns or 'T' not in df.columns:
                         raise ValueError("Format file tidak sesuai. Pastikan kolom 'Nh' dan 'T' tersedia.")
 
-                    # Konversi kolom 'Nh' ke label angka
-                    df['Nh_label'] = df['Nh'].apply(convert_to_label)
-                    df['Prediction'] = df.apply(lambda row: make_prediction(row['Nh_label'], row['T']), axis=1)
-                    
+                    # Buat salinan DataFrame agar data asli tidak terpengaruh
+                    df_processed = df.copy()
+
+                    # Preprocessing kolom 'Nh'
+                    df_processed['Nh_label'] = df['Nh'].apply(lambda x: convert_to_label(x) if isinstance(x, str) else x)
+                    df_processed['Prediction'] = df_processed.apply(lambda row: make_prediction(row['Nh_label'], row['T']), axis=1)
+
                     # Buat DataFrame baru dengan format yang diinginkan
-                    prediction_df = df[['Nh', 'T', 'Nh_label', 'Prediction']]
-                    prediction_df.columns = ['Jumlah Awan', 'Target Suhu', 'Label Jumlah Awan', 'Prediksi Suhu']
-                
+                    prediction_df = df_processed[['Nh', 'Prediction']]
+                    prediction_df.columns = ['Jumlah Awan', 'Prediksi Suhu']
+
                 except Exception as e:
                     return render_template('error_template.html', error_message=str(e))
 
-                # Render tabel prediksi di halaman web
+                # Menghasilkan tabel HTML dengan menambahkan properti style="text-align: center;" pada header
                 prediction_table = prediction_df.to_html(classes="table table-striped", index=False)
+                prediction_table = prediction_table.replace('<th>', '<th style="text-align: center;">')
+                download_link = f"/download/{filename}"
 
-                # Tambahkan tombol unduh untuk tabel prediksi
-                download_link = f"/download/{filename}"  # Mengarahkan ke endpoint unduhan
-
-                # Pastikan direktori 'downloads' ada
                 if not os.path.exists('downloads'):
                     os.makedirs('downloads')
                 output_path = os.path.join('downloads', filename)
-                prediction_df.to_excel(output_path, index=False)  # Simpan prediksi ke file Excel
-                
-                return render_template('index.html', prediction_table=prediction_table, download_link=download_link)
+                prediction_df.to_excel(output_path, index=False)
+
+                return render_template('index.html', prediction_df=prediction_df, prediction_table=prediction_table, download_link=download_link)
 
     return render_template('index.html', prediction_text="Mohon inputkan nilai Jumlah Awan dan T, atau unggah file Excel.")
 
