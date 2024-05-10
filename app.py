@@ -34,7 +34,6 @@ def convert_to_label(input_value):
         return None  # Menangani input yang tidak valid
 
 
-
 # Memuat model dari file 'model.pkl'
 with open('model/model.pkl', 'rb') as b:
     model = pickle.load(b)
@@ -44,7 +43,7 @@ with open('model/scaler.pkl', 'rb') as s:
     scaler = pickle.load(s)
 
 @app.route("/")
-def hello():
+def home():
     return render_template('index.html')
 
 @app.route("/predict", methods=['POST'])
@@ -72,14 +71,23 @@ def predict():
                 file.save(file_path)
                 df = pd.read_excel(file_path)
                 
-                # Konversi kolom 'Nh' ke label angka
-                df['Nh_label'] = df['Nh'].apply(convert_to_label)
-                df['Prediction'] = df.apply(lambda row: make_prediction(row['Nh_label'], row['T']), axis=1)
+                try:
+                    df = pd.read_excel(file_path)
+                    # Periksa apakah header sesuai dengan yang diharapkan
+                    if 'Nh' not in df.columns or 'T' not in df.columns:
+                        raise ValueError("Format file tidak sesuai. Pastikan kolom 'Nh' dan 'T' tersedia.")
+
+                    # Konversi kolom 'Nh' ke label angka
+                    df['Nh_label'] = df['Nh'].apply(convert_to_label)
+                    df['Prediction'] = df.apply(lambda row: make_prediction(row['Nh_label'], row['T']), axis=1)
+                    
+                    # Buat DataFrame baru dengan format yang diinginkan
+                    prediction_df = df[['Nh', 'T', 'Nh_label', 'Prediction']]
+                    prediction_df.columns = ['Jumlah Awan', 'Target Suhu', 'Label Jumlah Awan', 'Prediksi Suhu']
                 
-                # Buat DataFrame baru dengan format yang diinginkan
-                prediction_df = df[['Nh', 'T', 'Nh_label', 'Prediction']]
-                prediction_df.columns = ['Jumlah Awan', 'Target Suhu', 'Label Jumlah Awan', 'Prediksi Suhu']
-                
+                except Exception as e:
+                    return render_template('error_template.html', error_message=str(e))
+
                 # Render tabel prediksi di halaman web
                 prediction_table = prediction_df.to_html(classes="table table-striped", index=False)
 
@@ -117,6 +125,13 @@ def download(filename):
 
     # Kembalikan file Excel sebagai respons unduhan
     return send_file(output_path, as_attachment=True)
+
+@app.route("/download_template")
+def download_template():
+    # Tentukan path ke template Excel
+    template_path = "templates/template.xlsx"
+    # Kembalikan template sebagai respons unduhan
+    return send_file(template_path, as_attachment=True)
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8080, debug=True)
