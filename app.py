@@ -12,51 +12,50 @@ app = Flask(__name__)
 
 # Fungsi untuk mengonversi nilai Nh ke dalam label angka
 def convert_to_label(input_value):
-    if isinstance(input_value, str):  # Periksa apakah nilai input adalah string
-        # Buat dictionary untuk memetakan kategori ke label
+    if isinstance(input_value, str):  
         if input_value == "no clouds":
-            return 8  # 'no clouds'
+            return 8  
         elif input_value == "10%  or less, but not 0":
-            return 0  # '10% or less, but not 0'
+            return 0  
         elif input_value == "20–30%.":
-            return 2  # '20-30%'
+            return 2  
         elif input_value == "40%.":
-            return 3  # '40%'
+            return 3  
         elif input_value == "50%.":
-            return 4  # '50%'
+            return 4  
         elif input_value == "60%.":
-            return 5  # '60%'
+            return 5  
         elif input_value == "70 – 80%.":
-            return 6  # '70 - 80%'
+            return 6  
         elif input_value == "90  or more, but not 100%":
-            return 7  # "90  or more, but not 100%"
+            return 7  
         elif input_value == "100%.":
-            return 1  # '100%'
+            return 1  
         else:
-            return "Data masukan tidak valid"  # Menangani input yang tidak valid
-    elif isinstance(input_value, float):  # Jika nilai input adalah float
+            return "Data masukan tidak valid"  
+    elif isinstance(input_value, float):  
         if input_value == 0:
-            return 8  # 'no clouds'
+            return 8  
         elif input_value <= 10:
-            return 0  # '10% or less, but not 0'
+            return 0  
         elif input_value <= 30:
-            return 2  # '20-30%'
+            return 2  
         elif input_value <= 40:
-            return 3  # '40%'
+            return 3  
         elif input_value <= 50:
-            return 4  # '50%'
+            return 4  
         elif input_value <= 60:
-            return 5  # '60%'
+            return 5  
         elif input_value <= 80:
-            return 6  # '70 - 80%'
+            return 6  
         elif input_value < 100:
-            return 7  # '90 or more, but not 100%'
+            return 7  
         elif input_value == 100:
-            return 1  # '100%'
+            return 1  
         else:
-            return "Data masukan tidak valid"  # Menangani input yang tidak valid
+            return "Data masukan tidak valid"  
     else:
-        return "Data masukan tidak valid"  # Menangani input yang tidak valid
+        return "Data masukan tidak valid"
 
 # Memuat model dari file 'model.pkl'
 with open('model/model.pkl', 'rb') as f:
@@ -117,7 +116,7 @@ def predict():
                     df_processed = df.copy()
 
                     # Preprocessing kolom 'Nh'
-                    df_processed['Nh_label'] = df['Nh'].apply(lambda x: convert_to_label(x) if isinstance(x, str) else x)
+                    df_processed['Nh_label'] = df['Nh'].apply(lambda x: convert_to_label(x) if isinstance(x, (str, float)) else x)
                     df_processed['Prediction'] = df_processed.apply(lambda row: make_prediction(row['Nh_label'], row['T']), axis=1)
 
                     # Buat DataFrame baru dengan format yang diinginkan
