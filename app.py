@@ -86,7 +86,14 @@ def predict():
         
         prediction_table = prediction_df.to_html(classes="table table-striped", index=False)
         prediction_table = prediction_table.replace('<th>', '<th style="text-align: center;">')
-        return render_template('index.html', prediction_df=prediction_df, prediction_table=prediction_table,)
+        download_link = f"/download/hasil-prediksi"
+
+        if not os.path.exists('downloads'):
+            os.makedirs('downloads')
+        output_path = os.path.join('downloads', 'hasil-prediksi.xlsx')
+        prediction_df.to_excel(output_path, index=False)
+
+        return render_template('index.html', prediction_df=prediction_df, prediction_table=prediction_table, download_link=download_link)
 
     # Jika user mengunggah file Excel
     if 'file' in request.files:
@@ -149,12 +156,21 @@ def make_prediction(Nh_label, T):
     return round(y_pred_denormalized[0], 8)
 
 @app.route("/download/<filename>")
-def download(filename):
+def download_file(filename):
     # Tentukan path file hasil prediksi
     output_path = os.path.join('downloads', filename)
 
     # Kembalikan file Excel sebagai respons unduhan
     return send_file(output_path, as_attachment=True)
+
+@app.route("/download/hasil-prediksi", methods=['GET'])
+def download_field():
+    output_path = os.path.join('downloads', 'hasil-prediksi.xlsx')
+    if os.path.exists(output_path):
+        return send_file(output_path, as_attachment=True)
+    else:
+        return render_template('error_template.html', error_message="File not found")
+
 
 @app.route("/download_template")
 def download_template():
