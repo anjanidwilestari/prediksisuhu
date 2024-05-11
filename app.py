@@ -35,24 +35,23 @@ def convert_to_label(input_value):
         else:
             return "Data masukan tidak valid"  # Menangani input yang tidak valid
     elif isinstance(input_value, float):  # Jika nilai input adalah float
-        rounded_value = int(round(input_value))  # Bulatkan nilai input
-        if rounded_value == 0:
+        if input_value == 0:
             return 8  # 'no clouds'
-        elif rounded_value <= 10:
+        elif input_value <= 10:
             return 0  # '10% or less, but not 0'
-        elif rounded_value <= 30:
+        elif input_value <= 30:
             return 2  # '20-30%'
-        elif rounded_value <= 40:
+        elif input_value <= 40:
             return 3  # '40%'
-        elif rounded_value <= 50:
+        elif input_value <= 50:
             return 4  # '50%'
-        elif rounded_value <= 60:
+        elif input_value <= 60:
             return 5  # '60%'
-        elif rounded_value <= 80:
+        elif input_value <= 80:
             return 6  # '70 - 80%'
-        elif rounded_value < 100:
+        elif input_value < 100:
             return 7  # '90 or more, but not 100%'
-        elif rounded_value == 100:
+        elif input_value == 100:
             return 1  # '100%'
         else:
             return "Data masukan tidak valid"  # Menangani input yang tidak valid
@@ -60,12 +59,12 @@ def convert_to_label(input_value):
         return "Data masukan tidak valid"  # Menangani input yang tidak valid
 
 # Memuat model dari file 'model.pkl'
-with open('model/model.pkl', 'rb') as b:
-    model = pickle.load(b)
+with open('model/model.pkl', 'rb') as f:
+    model = pickle.load(f)
 
 # Memuat scaler dari file 'scaler.pkl'
-with open('model/scaler.pkl', 'rb') as s:
-    scaler = pickle.load(s)
+with open('model/scaler.pkl', 'rb') as f:
+    scaler = pickle.load(f)
 
 @app.route("/")
 def home():
@@ -75,11 +74,19 @@ def home():
 def predict():
     # Jika user mengirimkan input via text field
     if 'Nh' in request.form and 'T' in request.form:
-        Nh = float(request.form['Nh'])  # Ubah ke float
-        T = float(request.form['T'])  # Ubah ke float
-        Nh_label = convert_to_label(Nh)  # Mengonversi Nh ke label angka
-        output = make_prediction(Nh_label, T)  # Prediksi menggunakan Nh_label
-        return render_template('index.html', prediction_text=f"Prediksi Suhu berdasarkan Jumlah Awan {Nh} ({Nh_label}) adalah {output} Celcius")
+        try:
+            Nh = float(request.form['Nh'])
+            T = float(request.form['T'])
+            Nh_label = convert_to_label(Nh)
+            output = make_prediction(Nh_label, T)
+            prediction_df = pd.DataFrame({'Jumlah Awan': [Nh], 'Nh Label': [Nh_label], 'Prediksi Suhu': [output]})
+        
+        except Exception as e:
+            return render_template('error_template.html', error_message=str(e))
+        
+        prediction_table = prediction_df.to_html(classes="table table-striped", index=False)
+        prediction_table = prediction_table.replace('<th>', '<th style="text-align: center;">')
+        return render_template('index.html', prediction_df=prediction_df, prediction_table=prediction_table,)
 
     # Jika user mengunggah file Excel
     if 'file' in request.files:
@@ -107,8 +114,8 @@ def predict():
                     df_processed['Prediction'] = df_processed.apply(lambda row: make_prediction(row['Nh_label'], row['T']), axis=1)
 
                     # Buat DataFrame baru dengan format yang diinginkan
-                    prediction_df = df_processed[['Nh', 'Prediction']]
-                    prediction_df.columns = ['Jumlah Awan', 'Prediksi Suhu']
+                    prediction_df = df_processed[['Nh', 'Nh_label','Prediction']]
+                    prediction_df.columns = ['Jumlah Awan', 'Nh Label','Prediksi Suhu']
 
                 except Exception as e:
                     return render_template('error_template.html', error_message=str(e))

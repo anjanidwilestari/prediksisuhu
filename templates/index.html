@@ -40,18 +40,10 @@
           <!-- Form untuk prediksi suhu -->
           <form action="{{ url_for('predict') }}" method="post">
             <div class="mb-3">
-              <input type="text" class="form-control" id="Nh" name="Nh" placeholder="Masukkan nilai Nh (Jumlah Semua Awan) [0-100]" pattern="^(100(\.0{1,2})?|[0-9]?[0-9](\.[0-9]{1,2})?)$" title="Masukkan nilai antara 0 hingga 100" required />
+              <input type="number" class="form-control" id="Nh" name="Nh" step="0.01" min="0" max="100" placeholder="Masukkan nilai Nh (Jumlah Semua Awan) [0-100]" title="Masukkan nilai numerik dengan maksimal dua desimal (contoh: 20.5)" required />
             </div>
             <div class="mb-3">
-              <input
-                type="text"
-                class="form-control"
-                id="T"
-                name="T"
-                placeholder="Masukkan nilai T (Target Suhu) [0 atau 22,6-36,8] "
-                pattern="^((0)|([2][2-9]\.[6-9]|[3][0-5]\.[0-8])|36\.[0-8])$"
-                title="Masukkan nilai antara 0 atau 22,6-36,8"
-                required />
+              <input type="number" class="form-control" id="T" name="T" step="0.01" min="0" max="50" placeholder="Masukkan nilai T (Target Suhu) [0 atau 22,6-36,8]" title="Masukkan nilai numerik dengan maksimal dua desimal (contoh: 36.8)" required />
             </div>
             <div class="mb-3">
               <button type="submit" class="btn btn-warning w-100">Prediksi</button>
@@ -81,9 +73,6 @@
 
       <!-- Hasil Prediksi -->
       <hr />
-      <div class="text-center">
-        <b>{{ prediction_text }}</b>
-      </div>
       <!-- Tampilkan tabel prediksi jika ada -->
       {% if prediction_table %}
       <div class="row justify-content-center mt-3">
@@ -97,8 +86,9 @@
                 <thead>
                   <tr>
                     <th>No</th>
-                    <th>Jumlah Awan</th>
-                    <th>Prediksi Suhu</th>
+                    <th>Jumlah Awan (%)</th>
+                    <th>Nh Label</th>
+                    <th>Prediksi Suhu (°C)</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -106,6 +96,7 @@
                   <tr>
                     <td>{{ loop.index}}</td>
                     <td>{{ row['Jumlah Awan'] }}</td>
+                    <td>{{ row['Nh Label'] }}</td>
                     <td>{{ row['Prediksi Suhu'] }}</td>
                   </tr>
                   {% endfor %}
@@ -137,7 +128,7 @@
     </div>
     <!-- Footer -->
     <div class="footer text-center" style="background-color: #ffffff; padding: 10px 0">
-      <p>&copy; 2024 Anjani Dwilestari &#174; - Skripsi</p>
+      <p>&copy; 2024 Skripsi - Anjani Dwilestari</p>
     </div>
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-+voBBN5F5BRf/x5s0j28rPdYorogHsTs+jTkVvk5UL0vEArUfweha0El+NyoXp+1" crossorigin="anonymous"></script>
