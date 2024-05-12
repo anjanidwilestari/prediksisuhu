@@ -132,14 +132,23 @@ class NeuralNetwork:
         self.hidden = hidden
         self.output = output
 
-    def initialize_weights(self, scale=0.01, bias=False):
-        self.hidden_weights=np.random.normal(scale=0.01,size=(self.input,self.hidden))
-        self.output_weights=np.random.normal(scale=0.01,size=(self.hidden,self.output))
+    def initialize_weights(self,  bias=False):
+        self.hidden_weights=np.random.normal(size=(self.input,self.hidden))
+        self.output_weights=np.random.normal(size=(self.hidden,self.output))
         self.bias = False
         if bias:
-            self.hidden_bias_weights=np.random.normal(scale=0.01,size=(1,self.hidden))
-            self.output_bias_weights=np.random.normal(scale=0.01,size=(1,self.output))
+            self.hidden_bias_weights=np.random.normal(size=(1,self.hidden))
+            self.output_bias_weights=np.random.normal(size=(1,self.output))
             self.bias = True
+    
+    # def initialize_weights(self, bias=False):
+    #     self.hidden_weights=np.random.uniform(size=(self.input,self.hidden))
+    #     self.output_weights=np.random.uniform(size=(self.hidden,self.output))
+    #     self.bias = False
+    #     if bias:
+    #         self.hidden_bias_weights=np.random.uniform(size=(1,self.hidden))
+    #         self.output_bias_weights=np.random.uniform(size=(1,self.output))
+    #         self.bias = True
             
     def print_weights(self):
         print("Hidden Weights:")
@@ -233,7 +242,7 @@ def select_features(solution, df):
     return selected_df
 
 # Pilih fitur-fitur yang sesuai dengan best solution
-selected_features_test = select_features(best_solution, X_test)
+selected_features_test = select_features(best_solution, X)
 # print('\nselected_features_test')
 # print(selected_features_test)
 
@@ -244,11 +253,12 @@ t1 = time.perf_counter()
 # Inisialisasi objek NeuralNetwork
 input_size = selected_features_test.shape[1]
 hidden_size=2
-output_size=len(y_test)
+output_size=len(y)
 nn = NeuralNetwork(input_size, hidden_size, output_size)
 
 # Inisialisasi bobot dengan atau tanpa bias
-nn.initialize_weights(scale=0.01, bias=True)
+nn.initialize_weights( bias=False)
+# nn.initialize_weights(bias=True)
 
 # Inisialisasi objek Backpropagation dengan objek NeuralNetwork yang telah dibuat
 epochs=2
@@ -258,19 +268,19 @@ bp = Backpropagation(nn, epochs, learning_rate, activation_function)
 
 # Lakukan prediksi dengan data uji
 input_data = selected_features_test.values
-actual_data = np.array(y_test)
+actual_data = np.array(y)
 y_pred = bp.predict(input_data, actual_data.reshape(-1, 1))
 
 #Denormalisasi y_pred
 scaler_T = MinMaxScaler() # Membuat scaler baru untuk kolom 'T'
 scaler_T.fit(df['T'].values.reshape(-1, 1)) # Sesuaikan scaler baru dengan nilai asli 'T'
 y_pred_denorm = scaler_T.inverse_transform(np.array(y_pred).reshape(-1, 1))[:, 0] # Denormalisasi kolom 'T'
-y_test_denorm = scaler_T.inverse_transform(np.array(y_test).reshape(-1, 1))[:, 0] # Denormalisasi kolom 'T'
+y_test_denorm = scaler_T.inverse_transform(np.array(y).reshape(-1, 1))[:, 0] # Denormalisasi kolom 'T'
 
 # Membuat DataFrame untuk menampung hasil
 df_results_test = pd.DataFrame({
     'Nilai Prediksi': y_pred,
-    'Nilai Target': y_test,
+    'Nilai Target': y,
     'Denormalisasi Nilai Prediksi': y_pred_denorm,
     'Denormalisasi Nilai Target': y_test_denorm
 })

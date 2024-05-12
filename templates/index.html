@@ -99,7 +99,7 @@
                     <td>{{ loop.index}}</td>
                     <td>{{ row['Jumlah Awan'] }}</td>
                     <td>{{ row['Nh Label'] }}</td>
-                    <td>{{ row['Prediksi Suhu'] }}</td>
+                    <td>{{ row['Prediksi Suhu'] | round(2) }}</td>
                   </tr>
                   {% endfor %}
                 </tbody>
