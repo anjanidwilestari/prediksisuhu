@@ -107,14 +107,14 @@
               <div class="col-md-4">
                 <!-- Ubah ukuran kolom menjadi col-md-4 untuk membuatnya sejajar -->
                 <div class="input-group mb-3">
-                  <span style="background-color: #ffc107" class="input-group-text">MAE</span>
+                  <span style="background-color: #dee2e6" class="input-group-text">MAE</span>
                   <input type="text" class="form-control" aria-label="MAE" value="{{ mae | round(2) }}" readonly />
                 </div>
               </div>
               <div class="col-md-4">
                 <!-- Ubah ukuran kolom menjadi col-md-4 untuk membuatnya sejajar -->
                 <div class="input-group mb-3">
-                  <span style="background-color: #ffc107" class="input-group-text">MAE%</span>
+                  <span style="background-color: #dee2e6" class="input-group-text">MAE%</span>
                   <input type="text" class="form-control" aria-label="MAE Percentage" value="{{ mae_percentage | round(2) }}%" readonly />
                 </div>
               </div>
@@ -134,7 +134,7 @@
             <div class="row justify-content-center mb-3">
               <div class="col">
                 <a href="{{ url_for('home') }}" class="btn btn-primary mt-3">Ulangi</a>
-                <a href="{{ download_link }}" class="btn btn-success mt-3">Unduh Prediksi</a>
+                <a href="{{ download_link }}" class="btn btn-warning mt-3">Unduh Prediksi</a>
               </div>
             </div>
           </div>
