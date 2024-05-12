@@ -299,12 +299,12 @@ mae_test = mean_absolute_error(y_test_denorm, y_pred_denorm)
 
 # #SAVE MODEL
 # # Simpan model ke file menggunakan pickle
-import pickle
+# import pickle
 
-with open('model/model.pkl', 'wb') as f:
-    pickle.dump(bp, f)
+# with open('model/model.pkl', 'wb') as f:
+#     pickle.dump(bp, f)
     
-with open('model/scaler.pkl', 'wb') as f:
-    pickle.dump(scaler_T, f)
+# with open('model/scaler.pkl', 'wb') as f:
+#     pickle.dump(scaler_T, f)
 
 # print("Model telah disimpan dalam file 'model.pkl'")

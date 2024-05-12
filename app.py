@@ -166,9 +166,11 @@ def make_prediction(Nh_label, T):
 def download_file(filename):
     # Tentukan path file hasil prediksi
     output_path = os.path.join('downloads', filename)
-
-    # Kembalikan file Excel sebagai respons unduhan
-    return send_file(output_path, as_attachment=True)
+    if os.path.exists(output_path):
+        # Kembalikan file Excel sebagai respons unduhan
+        return send_file(output_path, as_attachment=True)
+    else:
+        return render_template('error_template.html', error_message="File not found")
 
 @app.route("/download/hasil-prediksi", methods=['GET'])
 def download_field():
