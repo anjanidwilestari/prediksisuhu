@@ -284,7 +284,7 @@ t2 = time.perf_counter()
 from sklearn.metrics import mean_absolute_error
 
 # Menghitung MAE data uji denormalisasi
-# mae_test = mean_absolute_error(y_test_denorm, y_pred_denorm)
+mae_test = mean_absolute_error(y_test_denorm, y_pred_denorm)
 # print("Mean Absolute Error:", mae_test)
 
 # #SAVE MODEL

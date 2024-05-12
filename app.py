@@ -5,7 +5,7 @@ import pickle
 import numpy as np
 from sklearn.preprocessing import MinMaxScaler
 from werkzeug.utils import secure_filename
-from sklearn.impute import KNNImputer  # Import KNNImputer
+from sklearn.metrics import mean_absolute_error
 from model.model import Backpropagation, NeuralNetwork, Sigmoid
 
 app = Flask(__name__)
@@ -57,6 +57,12 @@ def convert_to_label(input_value):
     else:
         return None  # Mengembalikan nilai None untuk nilai yang tidak valid
 
+def calculate_mae_percentage(predictions, actual):
+    mae = mean_absolute_error(predictions, actual)
+    mean_observation = sum(actual) / len(actual)
+    mae_percentage = (mae / mean_observation) * 100
+    return mae, mae_percentage
+
 # Memuat model dari file 'model.pkl'
 with open('model/model.pkl', 'rb') as f:
     model = pickle.load(f)
@@ -79,7 +85,7 @@ def predict():
             Nh_label = convert_to_label(Nh)
             output = make_prediction(Nh_label, T)
             prediction_df = pd.DataFrame({'Jumlah Awan': [Nh], 'Nh Label': [Nh_label], 'Prediksi Suhu': [output]})
-        
+            mae, mae_percentage = calculate_mae_percentage([output], [T])
         except Exception as e:
             return render_template('error_template.html', error_message=str(e))
         
@@ -92,7 +98,7 @@ def predict():
         output_path = os.path.join('downloads', 'hasil-prediksi.xlsx')
         prediction_df.to_excel(output_path, index=False)
 
-        return render_template('index.html', prediction_df=prediction_df, prediction_table=prediction_table, download_link=download_link)
+        return render_template('index.html', prediction_df=prediction_df, prediction_table=prediction_table, download_link=download_link, mae=mae, mae_percentage=mae_percentage)
 
     # Jika user mengunggah file Excel
     if 'file' in request.files:
@@ -118,6 +124,7 @@ def predict():
                     # Preprocessing kolom 'Nh'
                     df_processed['Nh_label'] = df['Nh'].apply(lambda x: convert_to_label(x) if isinstance(x, str) or isinstance(x, float) else x)
                     df_processed['Prediction'] = df_processed.apply(lambda row: make_prediction(row['Nh_label'], row['T']), axis=1)
+                    mae, mae_percentage = calculate_mae_percentage(np.array(df_processed['Prediction']), np.array(df['T']))
 
                     # Buat DataFrame baru dengan format yang diinginkan
                     prediction_df = df_processed[['Nh', 'Nh_label','Prediction']]
@@ -136,7 +143,7 @@ def predict():
                 output_path = os.path.join('downloads', filename)
                 prediction_df.to_excel(output_path, index=False)
 
-                return render_template('index.html', prediction_df=prediction_df, prediction_table=prediction_table, download_link=download_link)
+                return render_template('index.html', prediction_df=prediction_df, prediction_table=prediction_table, download_link=download_link, mae=mae, mae_percentage=mae_percentage)
 
     return render_template('index.html', prediction_text="Mohon inputkan nilai Jumlah Awan dan T, atau unggah file Excel.")
 
@@ -153,6 +160,7 @@ def make_prediction(Nh_label, T):
     y_pred_denormalized = scaler.inverse_transform(np.array(y_pred_normalized).reshape(-1, 1))[:, 0]
 
     return round(y_pred_denormalized[0], 8)
+
 
 @app.route("/download/<filename>")
 def download_file(filename):
