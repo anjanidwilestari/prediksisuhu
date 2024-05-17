@@ -59,7 +59,7 @@
           <form action="{{ url_for('predict') }}" method="post" enctype="multipart/form-data">
             <div class="text-center mb-5">
               <h5>Atau prediksi melalui file disini</h5>
-              <p>Pastikan file memiliki header kolom [Nh] dan [T]</p>
+              <p>Pastikan file memiliki header kolom [Nh] dan [T]. <a href="{{ url_for('download_template') }}">Unduh format</a></p>
             </div>
             <div class="row mb-3">
               <div class="col-md-8">
