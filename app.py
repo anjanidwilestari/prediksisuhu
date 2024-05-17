@@ -66,15 +66,15 @@ def calculate_mae_percentage(predictions, actual):
 # Memuat model dari file 'model.pkl'
 with open('model/model.pkl', 'rb') as f:
     model = pickle.load(f)
-
+    
 # Memuat scaler dari file 'scaler.pkl'
 with open('model/scaler.pkl', 'rb') as f:
     scaler = pickle.load(f)
-
+    
 @app.route("/")
 def home():
     return render_template('index.html')
-
+    
 @app.route("/predict", methods=['POST'])
 def predict():
     # Jika user mengirimkan input via text field
@@ -88,16 +88,15 @@ def predict():
             mae, mae_percentage = calculate_mae_percentage([output], [T])
         except Exception as e:
             return render_template('error_template.html', error_message=str(e))
-        
+
         prediction_table = prediction_df.to_html(classes="table table-striped", index=False)
         prediction_table = prediction_table.replace('<th>', '<th style="text-align: center;">')
-        download_link = f"/download/hasil-prediksi.xlsx"
-
+        download_link = f"/download/hasil-prediksi"
         if not os.path.exists('downloads'):
             os.makedirs('downloads')
         output_path = os.path.join('downloads', 'hasil-prediksi.xlsx')
         prediction_df.to_excel(output_path, index=False)
-
+        
         return render_template('index.html', prediction_df=prediction_df, prediction_table=prediction_table, download_link=download_link, mae=mae, mae_percentage=mae_percentage)
 
     # Jika user mengunggah file Excel
@@ -113,14 +112,11 @@ def predict():
                 file_path = os.path.join('uploads', filename)
                 file.save(file_path)
                 df = pd.read_excel(file_path)
-
                 try:
                     if 'Nh' not in df.columns or 'T' not in df.columns:
                         raise ValueError("Format file tidak sesuai. Pastikan kolom 'Nh' dan 'T' tersedia.")
-
                     # Buat salinan DataFrame agar data asli tidak terpengaruh
                     df_processed = df.copy()
-
                     # Preprocessing kolom 'Nh'
                     df_processed['Nh_label'] = df['Nh'].apply(lambda x: convert_to_label(x) if isinstance(x, str) or isinstance(x, float) else x)
                     df_processed['Prediction'] = df_processed.apply(lambda row: make_prediction(row['Nh_label'], row['T']), axis=1)
@@ -129,15 +125,12 @@ def predict():
                     # Buat DataFrame baru dengan format yang diinginkan
                     prediction_df = df_processed[['Nh', 'Nh_label','Prediction']]
                     prediction_df.columns = ['Jumlah Awan', 'Nh Label','Prediksi Suhu']
-
                 except Exception as e:
                     return render_template('error_template.html', error_message=str(e))
-
                 # Menghasilkan tabel HTML dengan menambahkan properti style="text-align: center;" pada header
                 prediction_table = prediction_df.to_html(classes="table table-striped", index=False)
                 prediction_table = prediction_table.replace('<th>', '<th style="text-align: center;">')
                 download_link = f"/download/{filename}"
-
                 if not os.path.exists('downloads'):
                     os.makedirs('downloads')
                 output_path = os.path.join('downloads', filename)
@@ -147,20 +140,16 @@ def predict():
 
     return render_template('index.html', prediction_text="Mohon inputkan nilai Jumlah Awan dan T, atau unggah file Excel.")
 
-
 def make_prediction(Nh_label, T):
     # Normalisasi data input
     Nh_normalized = scaler.transform(np.array([[Nh_label]]))[:, 0]  # Menggunakan Nh_label
     T_normalized = scaler.transform(np.array([[T]]))[:, 0]
-
     # Lakukan prediksi dengan model yang dimuat
     y_pred_normalized = model.predict([Nh_normalized], [T_normalized])
-
     # Denormalisasi hasil prediksi
     y_pred_denormalized = scaler.inverse_transform(np.array(y_pred_normalized).reshape(-1, 1))[:, 0]
 
     return round(y_pred_denormalized[0], 8)
-
 
 @app.route("/download/<filename>")
 def download_file(filename):
@@ -171,22 +160,21 @@ def download_file(filename):
         return send_file(output_path, as_attachment=True)
     else:
         return render_template('error_template.html', error_message="File not found")
-
-@app.route("/download/hasil-prediksi.xlsx", methods=['GET'])
+        
+@app.route("/download/hasil-prediksi", methods=['GET'])
 def download_field():
     output_path = os.path.join('downloads', 'hasil-prediksi.xlsx')
     if os.path.exists(output_path):
         return send_file(output_path, as_attachment=True)
     else:
         return render_template('error_template.html', error_message="File not found")
-
-
+        
 @app.route("/download_template")
 def download_template():
     # Tentukan path ke template Excel
     template_path = "templates/template.xlsx"
     # Kembalikan template sebagai respons unduhan
     return send_file(template_path, as_attachment=True)
-
+    
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8080, debug=True)
