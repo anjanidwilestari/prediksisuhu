@@ -91,7 +91,7 @@ def predict():
         
         prediction_table = prediction_df.to_html(classes="table table-striped", index=False)
         prediction_table = prediction_table.replace('<th>', '<th style="text-align: center;">')
-        download_link = f"/download/hasil-prediksi"
+        download_link = f"/download/hasil-prediksi.xlsx"
 
         if not os.path.exists('downloads'):
             os.makedirs('downloads')
@@ -172,7 +172,7 @@ def download_file(filename):
     else:
         return render_template('error_template.html', error_message="File not found")
 
-@app.route("/download/hasil-prediksi", methods=['GET'])
+@app.route("/download/hasil-prediksi.xlsx", methods=['GET'])
 def download_field():
     output_path = os.path.join('downloads', 'hasil-prediksi.xlsx')
     if os.path.exists(output_path):
