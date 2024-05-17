@@ -6,7 +6,7 @@ import numpy as np
 from sklearn.preprocessing import MinMaxScaler
 from werkzeug.utils import secure_filename
 from sklearn.metrics import mean_absolute_error
-from model.model import Backpropagation, NeuralNetwork, Sigmoid
+from model.model_class import Backpropagation, NeuralNetwork, Sigmoid
 
 app = Flask(__name__)
 
