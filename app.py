@@ -175,6 +175,10 @@ def download_template():
     template_path = "templates/template.xlsx"
     # Kembalikan template sebagai respons unduhan
     return send_file(template_path, as_attachment=True)
+
+@app.route("/about")
+def about():
+    return render_template('about.html')
     
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8080, debug=True)

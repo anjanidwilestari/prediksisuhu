@@ -21,3 +21,14 @@ pythonanywhre
 5. cd prediksisuhu
 6. pip cache purge
 7. pip install -r requirements.txt --no-cache-dir
+
+
+cara mengganti tag <style> ke style.css
+1. buat direktori dan file nya
+├── static/
+│   └── css/
+│       └── style.css
+2. isikan style.css nya
+3. dipanggil di index.html
+<!-- Custom CSS -->
+<link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet" />
