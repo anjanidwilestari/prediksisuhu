@@ -43,10 +43,10 @@
           <!-- Form untuk prediksi suhu -->
           <form action="{{ url_for('predict') }}" method="post">
             <div class="mb-3">
-              <input type="number" class="form-control" id="Nh" name="Nh" step="0.01" min="0" max="100" placeholder="Masukkan nilai Nh (Jumlah Semua Awan) [0-100]" title="Masukkan nilai numerik dengan maksimal dua desimal (contoh: 20.5)" required />
+              <input type="number" class="form-control" id="Nh" name="Nh" step="0.01" min="0" max="100" placeholder="Masukkan Persentase Jumlah Semua Awan (%)" title="Masukkan nilai numerik dengan maksimal dua desimal (contoh: 20.5)" required />
             </div>
             <div class="mb-3">
-              <input type="number" class="form-control" id="T" name="T" step="0.01" min="0" max="50" placeholder="Masukkan nilai T (Target Suhu) [0 atau 22,6-36,8]" title="Masukkan nilai numerik dengan maksimal dua desimal (contoh: 36.8)" required />
+              <input type="number" class="form-control" id="T" name="T" step="0.01" min="0" max="50" placeholder="Masukkan Target Suhu (°C)" title="Masukkan nilai numerik dengan maksimal dua desimal (contoh: 36.8)" required />
             </div>
             <div class="mb-3">
               <button type="submit" class="btn btn-warning w-100">Prediksi</button>
