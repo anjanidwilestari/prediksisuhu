@@ -1,4 +1,9 @@
 #### LIBRARY BACKPROPAGATION ####
+import pandas as pd
+import numpy as np
+import regex as re
+import openpyxl
+import os
 
 class NeuralNetwork:
     def __init__(self,input,hidden,output):

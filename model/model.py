@@ -133,16 +133,16 @@ class NeuralNetwork:
             self.output_bias_weights=np.random.normal(size=(1,self.output))
             self.bias = True
             
-    def print_weights(self):
-        print("Hidden Weights:")
-        print(self.hidden_weights)
-        print("\nOutput Weights:")
-        print(self.output_weights)
-        if self.bias:
-            print("\nHidden Bias Weights:")
-            print(self.hidden_bias_weights)
-            print("\nOutput Bias Weights:")
-            print(self.output_bias_weights)
+    # def print_weights(self):
+    #     print("Hidden Weights:")
+    #     print(self.hidden_weights)
+    #     print("\nOutput Weights:")
+    #     print(self.output_weights)
+    #     if self.bias:
+    #         print("\nHidden Bias Weights:")
+    #         print(self.hidden_bias_weights)
+    #         print("\nOutput Bias Weights:")
+    #         print(self.output_bias_weights)
 
 class Sigmoid:
     def activate(self, x):
@@ -245,7 +245,7 @@ bp = Backpropagation(nn, epochs, learning_rate, activation_function)
 # Lakukan prediksi dengan data uji
 input_data = selected_features_test.values
 actual_data = np.array(y_test)
-y_pred = bp.predict(input_data, actual_data.reshape(-1, 1))
+y_pred = bp.predict_new_value(input_data)
 
 #Denormalisasi y_pred
 scaler_T = MinMaxScaler() # Membuat scaler baru untuk kolom 'T'
@@ -272,14 +272,14 @@ from sklearn.metrics import mean_absolute_error
 mae_test = mean_absolute_error(y_test_denorm, y_pred_denorm)
 # print("Mean Absolute Error:", mae_test)
 
-# #SAVE MODEL
-# # Simpan model ke file menggunakan pickle
-# import pickle
+#SAVE MODEL
+# Simpan model ke file menggunakan pickle
+import pickle
 
-# with open('model/model.pkl', 'wb') as f:
-#     pickle.dump(bp, f)
+with open('model/model.pkl', 'wb') as f:
+    pickle.dump(bp, f)
     
-# with open('model/scaler.pkl', 'wb') as f:
-#     pickle.dump(scaler_T, f)
+with open('model/scaler.pkl', 'wb') as f:
+    pickle.dump(scaler_T, f)
 
 # print("Model telah disimpan dalam file 'model.pkl'")

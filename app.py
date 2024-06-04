@@ -12,50 +12,49 @@ app = Flask(__name__)
 
 # Fungsi untuk mengonversi nilai Nh ke dalam label angka
 def convert_to_label(input_value):
-    if isinstance(input_value, str):
-        if input_value == "no clouds":
-            return 8
-        elif input_value == "10%  or less, but not 0":
-            return 0
-        elif input_value == "20–30%.":
-            return 2
-        elif input_value == "40%.":
-            return 3
-        elif input_value == "50%.":
-            return 4
-        elif input_value == "60%.":
-            return 5
-        elif input_value == "70 – 80%.":
-            return 6
-        elif input_value == "90  or more, but not 100%":
-            return 7
-        elif input_value == "100%.":
-            return 1
-        else:
-            return None  # Mengembalikan nilai None untuk nilai yang tidak valid
-    elif isinstance(input_value, (int, float)):
-        if input_value == 0:
-            return 8
-        elif 0 < input_value <= 10:
-            return 0
-        elif 10 < input_value <= 30:
-            return 2
-        elif 30 < input_value <= 40:
-            return 3
-        elif 40 < input_value <= 50:
-            return 4
-        elif 50 < input_value <= 60:
-            return 5
-        elif 60 < input_value <= 80:
-            return 6
-        elif 80 < input_value < 100:
-            return 7
-        elif input_value == 100:
-            return 1
-        else:
-            return None  # Mengembalikan nilai None untuk nilai yang tidak valid
+    if input_value == "no clouds":
+        return 8.0
+    elif input_value == "10%  or less, but not 0":
+        return 0.0
+    elif input_value == "20–30%.":
+        return 2.0
+    elif input_value == "40%.":
+        return 3.0
+    elif input_value == "50%.":
+        return 4.0
+    elif input_value == "60%.":
+        return 5.0
+    elif input_value == "70 – 80%.":
+        return 6.0
+    elif input_value == "90  or more, but not 100%":
+        return 7.0
+    elif input_value == "100%.":
+        return 1.0
     else:
         return None  # Mengembalikan nilai None untuk nilai yang tidak valid
+    
+def convert_to_informative_description(input_value):
+    if input_value == "no clouds":
+        return "Tidak ada awan"
+    elif input_value == "10%  or less, but not 0":
+        return "10% atau kurang, tapi bukan 0"
+    elif input_value == "20–30%.":
+        return "20 - 30%"
+    elif input_value == "40%.":
+        return "40%"
+    elif input_value == "50%.":
+        return "50%"
+    elif input_value == "60%.":
+        return "60%"
+    elif input_value == "70 – 80%.":
+        return "70 - 80%"
+    elif input_value == "90  or more, but not 100%":
+        return "90% atau lebih, tapi bukan 100%"
+    elif input_value == "100%.":
+        return "100%"
+    else:
+        return input_value  # Mengembalikan nilai asli jika tidak ada yang cocok
+
 
 def calculate_mae_percentage(predictions, actual):
     mae = mean_absolute_error(predictions, actual)
@@ -77,15 +76,14 @@ def home():
     
 @app.route("/predict", methods=['POST'])
 def predict():
-    # Jika user mengirimkan input via text field
-    if 'Nh' in request.form and 'T' in request.form:
+    # Jika user mengirimkan input hanya via text field untuk Nh
+    if 'Nh' in request.form:
         try:
-            Nh = float(request.form['Nh'])
-            T = float(request.form['T'])
+            Nh = request.form['Nh']
             Nh_label = convert_to_label(Nh)
-            output = make_prediction(Nh_label, T)
-            prediction_df = pd.DataFrame({'Jumlah Awan': [Nh], 'Nh Label': [Nh_label], 'Prediksi Suhu': [output]})
-            mae, mae_percentage = calculate_mae_percentage([output], [T])
+            output = make_prediction(Nh_label)
+            Nh_informative = convert_to_informative_description(Nh)
+            prediction_df = pd.DataFrame({'Jumlah Awan': [Nh_informative], 'Nh Label': [Nh_label], 'Prediksi Suhu': [output]})
         except Exception as e:
             return render_template('error_template.html', error_message=str(e))
 
@@ -97,7 +95,7 @@ def predict():
         output_path = os.path.join('downloads', 'hasil-prediksi.xlsx')
         prediction_df.to_excel(output_path, index=False)
         
-        return render_template('index.html', prediction_df=prediction_df, prediction_table=prediction_table, download_link=download_link, mae=mae, mae_percentage=mae_percentage)
+        return render_template('index.html', prediction_df=prediction_df, prediction_table=prediction_table, download_link=download_link)
 
     # Jika user mengunggah file Excel
     if 'file' in request.files:
@@ -113,18 +111,18 @@ def predict():
                 file.save(file_path)
                 df = pd.read_excel(file_path)
                 try:
-                    if 'Nh' not in df.columns or 'T' not in df.columns:
-                        raise ValueError("Format file tidak sesuai. Pastikan kolom 'Nh' dan 'T' tersedia.")
+                    if 'Nh' not in df.columns:
+                        raise ValueError("Format file tidak sesuai. Pastikan kolom 'Nh' tersedia.")
                     # Buat salinan DataFrame agar data asli tidak terpengaruh
                     df_processed = df.copy()
                     # Preprocessing kolom 'Nh'
                     df_processed['Nh_label'] = df['Nh'].apply(lambda x: convert_to_label(x) if isinstance(x, str) or isinstance(x, float) else x)
-                    df_processed['Prediction'] = df_processed.apply(lambda row: make_prediction(row['Nh_label'], row['T']), axis=1)
-                    mae, mae_percentage = calculate_mae_percentage(np.array(df_processed['Prediction']), np.array(df['T']))
+                    df_processed['Prediction'] = df_processed['Nh_label'].apply(make_prediction)
+                    df_processed['Jumlah Awan'] = df['Nh'].apply(convert_to_informative_description)
 
                     # Buat DataFrame baru dengan format yang diinginkan
-                    prediction_df = df_processed[['Nh', 'Nh_label','Prediction']]
-                    prediction_df.columns = ['Jumlah Awan', 'Nh Label','Prediksi Suhu']
+                    prediction_df = df_processed[['Jumlah Awan', 'Nh_label', 'Prediction']]
+                    prediction_df.columns = ['Jumlah Awan', 'Nh Label', 'Prediksi Suhu']
                 except Exception as e:
                     return render_template('error_template.html', error_message=str(e))
                 # Menghasilkan tabel HTML dengan menambahkan properti style="text-align: center;" pada header
@@ -136,20 +134,19 @@ def predict():
                 output_path = os.path.join('downloads', filename)
                 prediction_df.to_excel(output_path, index=False)
 
-                return render_template('index.html', prediction_df=prediction_df, prediction_table=prediction_table, download_link=download_link, mae=mae, mae_percentage=mae_percentage)
-
+                return render_template('index.html', prediction_df=prediction_df, prediction_table=prediction_table, download_link=download_link)
     return render_template('index.html', prediction_text="Mohon inputkan nilai Jumlah Awan dan T, atau unggah file Excel.")
 
-def make_prediction(Nh_label, T):
+def make_prediction(Nh_label):
     # Normalisasi data input
     Nh_normalized = scaler.transform(np.array([[Nh_label]]))[:, 0]  # Menggunakan Nh_label
-    T_normalized = scaler.transform(np.array([[T]]))[:, 0]
     # Lakukan prediksi dengan model yang dimuat
-    y_pred_normalized = model.predict([Nh_normalized], [T_normalized])
+    y_pred_normalized = model.predict_new_value([Nh_normalized])
     # Denormalisasi hasil prediksi
     y_pred_denormalized = scaler.inverse_transform(np.array(y_pred_normalized).reshape(-1, 1))[:, 0]
 
     return round(y_pred_denormalized[0], 8)
+
 
 @app.route("/download/<filename>")
 def download_file(filename):

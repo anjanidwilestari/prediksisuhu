@@ -43,10 +43,18 @@
           <!-- Form untuk prediksi suhu -->
           <form action="{{ url_for('predict') }}" method="post">
             <div class="mb-3">
-              <input type="number" class="form-control" id="Nh" name="Nh" step="0.01" min="0" max="100" placeholder="Masukkan Persentase Jumlah Semua Awan (%)" title="Masukkan nilai numerik dengan maksimal dua desimal (contoh: 20.5)" required />
-            </div>
-            <div class="mb-3">
-              <input type="number" class="form-control" id="T" name="T" step="0.01" min="0" max="50" placeholder="Masukkan Target Suhu (°C)" title="Masukkan nilai numerik dengan maksimal dua desimal (contoh: 36.8)" required />
+              <select class="form-select" id="Nh" name="Nh" required>
+                <option value="" disabled selected>Pilih Persentase Jumlah Semua Awan</option>
+                <option value="no clouds">Tidak ada awan</option>
+                <option value="10%  or less, but not 0">10% atau kurang, tapi bukan 0</option>
+                <option value="20–30%.">20 - 30%</option>
+                <option value="40%.">40%</option>
+                <option value="50%.">50%</option>
+                <option value="60%.">60%</option>
+                <option value="70 – 80%.">70 - 80%</option>
+                <option value="90  or more, but not 100%">90% atau lebih, tapi bukan 100%</option>
+                <option value="100%.">100%</option>
+              </select>
             </div>
             <div class="mb-3">
               <button type="submit" class="btn btn-warning w-100">Prediksi</button>
@@ -60,7 +68,7 @@
           <form action="{{ url_for('predict') }}" method="post" enctype="multipart/form-data">
             <div class="text-center mb-5">
               <h5>Atau prediksi melalui file disini</h5>
-              <p>Pastikan file memiliki header kolom [Nh] dan [T]. <a href="{{ url_for('download_template') }}">Unduh format</a></p>
+              <p>Pastikan file memiliki header kolom [Nh]. <a href="{{ url_for('download_template') }}">Unduh format</a></p>
             </div>
             <div class="row mb-3">
               <div class="col-md-8">
@@ -105,22 +113,6 @@
                   {% endfor %}
                 </tbody>
               </table>
-            </div>
-            <div class="row justify-content-center mt-3">
-              <div class="col-md-4">
-                <!-- Ubah ukuran kolom menjadi col-md-4 untuk membuatnya sejajar -->
-                <div class="input-group mb-3">
-                  <span style="background-color: #dee2e6" class="input-group-text">MAE</span>
-                  <input type="text" class="form-control" aria-label="MAE" value="{{ mae | round(2) }}°C" readonly />
-                </div>
-              </div>
-              <div class="col-md-4">
-                <!-- Ubah ukuran kolom menjadi col-md-4 untuk membuatnya sejajar -->
-                <div class="input-group mb-3">
-                  <span style="background-color: #dee2e6" class="input-group-text">MAE%</span>
-                  <input type="text" class="form-control" aria-label="MAE Percentage" value="{{ mae_percentage | round(2) }}%" readonly />
-                </div>
-              </div>
             </div>
 
             <!-- JavaScript untuk inisialisasi DataTables -->
